@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs 'NodeJS18'
+    }
+
     environment {
         DOCKER_IMAGE = 'dhairya2704/internship-app'
     }
