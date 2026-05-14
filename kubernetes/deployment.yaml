@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: internship-app
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: internship-app
+
+  template:
+    metadata:
+      labels:
+        app: internship-app
+    
+    spec:
+      containers:
+      - name: internship-app
+        image: dhairya2704/internship-app:latest
+        ports: 
+        - containerPort: 3000
