@@ -7,12 +7,6 @@ pipeline {
 
     stages {
 
-        stage('Clone Repository') {
-            steps {
-                git 'https://github.com/DHAIRYA027/internship-devops-project'
-            }
-        }
-
         stage('Install Dependencies') {
             steps {
                 sh 'npm install'
