@@ -17,17 +17,20 @@ spec:
         app: internship-app
 
     spec:
+      automountServiceAccountToken: false
+
       containers:
         - name: internship-app
-          image: dhairya2704/internship-app:latest
+          image: dhairya2704/internship-app:v1
 
           ports:
             - containerPort: 3000
 
           resources:
             requests:
-              memory: "64Mi"
-              cpu: "250m"
-            limits:
               memory: "128Mi"
-              cpu: "500m"
+              cpu: "100m"
+
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
