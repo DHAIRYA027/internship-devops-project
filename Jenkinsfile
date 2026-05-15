@@ -82,7 +82,7 @@ pipeline {
                 nohup kubectl port-forward service/internship-service 3000:3000 >/dev/null 2>&1 &
                 sleep 15
 
-                docker run -t ghcr.io/zaproxy/zaproxy:stable \
+                docker run --rm -t ghcr.io/zaproxy/zaproxy:stable \
                 zap-baseline.py \
                 -t http://host.docker.internal:3000 || true
                 '''
