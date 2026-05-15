@@ -1,7 +1,19 @@
 FROM node:18
+
 WORKDIR /app
-COPY package.json ./
+
+COPY package*.json ./
+
 RUN npm install
+
 COPY . .
+
+ARG APP_VERSION
+ARG BUILD_NUMBER
+
+ENV APP_VERSION=$APP_VERSION
+ENV BUILD_NUMBER=$BUILD_NUMBER
+
 EXPOSE 3000
-CMD ["npm", "start"]
+
+CMD ["node", "index.js"]

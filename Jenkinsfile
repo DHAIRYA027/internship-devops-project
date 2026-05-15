@@ -42,7 +42,10 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $DOCKER_IMAGE:latest .'
+                sh "docker build \
+                    --build-arg APP_VERSION=1.0.${BUILD_NUMBER} \
+                    --build-arg BUILD_NUMBER=${BUILD_NUMBER} \
+                    -t dhairya2704/internship-app:latest ."
             }
         }
 
