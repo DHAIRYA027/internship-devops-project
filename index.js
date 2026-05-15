@@ -2,7 +2,7 @@ const express = require('express')
 const os = require('node:os')
 
 const app = express()
-app.disable('x-powered-by'
+app.disable('x-powered-by')
 
 const PORT = 3000
 const VERSION = process.env.APP_VERSION || '1.0.0'
