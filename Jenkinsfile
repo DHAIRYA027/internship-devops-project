@@ -23,6 +23,18 @@ pipeline {
             }
         }
 
+        stage('GitLeaks Scan') {
+            steps {
+                sh 'gitleaks detect --no-banner'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                sh 'sonar-scanner'
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 sh 'docker build -t $DOCKER_IMAGE:latest .'
