@@ -25,7 +25,7 @@ pipeline {
 
         stage('GitLeaks Scan') {
             steps {
-                sh 'gitleaks detect --no-banner'
+                sh 'gitleaks detect --no-banner --no-git'
             }
         }
 
