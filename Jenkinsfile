@@ -45,6 +45,13 @@ pipeline {
                 sh 'docker build -t $DOCKER_IMAGE:latest .'
             }
         }
+
+        stage('Grype Image Scan') {
+            steps {
+                sh 'grype docker:dhairya2704/internship-app:latest'
+            }
+        }
+        
         stage('Push Docker Image') {
             steps {
                 withCredentials([
