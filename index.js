@@ -46,7 +46,7 @@ app.get('/', (req, res) => {
 
       <body>
         <div class="card">
-          <h1>Internship DevSecOps Pipeline</h1>
+          <h1>DevSecOps Pipeline</h1>
 
           <p class="success">CI/CD Automation Successful</p>
 
