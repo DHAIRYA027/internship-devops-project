@@ -10,7 +10,7 @@ const VERSION = process.env.APP_VERSION || '1.0.0'
 const BUILD_NUMBER = process.env.BUILD_NUMBER || 'Local Build'
 
 app.get('/', (req, res) => {
-  res.send(`
+    res.send(`
     <html>
     <head>
         <title>DevSecOps Pipeline</title>
@@ -300,15 +300,15 @@ app.get('/', (req, res) => {
                     <div class="card-label">Integrated Toolchain</div>
                     <div class="tools-grid">
                         ${[
-      ['GitHub', 'Repository Integration'],
-      ['Jenkins', 'CI/CD Automation'],
-      ['GitLeaks', 'Secret Detection'],
-      ['SonarQube', 'SAST Analysis'],
-      ['Docker', 'Containerization'],
-      ['Grype', 'Vulnerability Scanning'],
-      ['Kubernetes', 'Minikube Deployment'],
-      ['OWASP ZAP', 'DAST Testing'],
-    ].map(([name, desc]) => `
+            ['GitHub', 'Repository Integration'],
+            ['Jenkins', 'CI/CD Automation'],
+            ['GitLeaks', 'Secret Detection'],
+            ['SonarQube', 'SAST Analysis'],
+            ['Docker', 'Containerization'],
+            ['Grype', 'Vulnerability Scanning'],
+            ['Kubernetes', 'Minikube Deployment'],
+            ['OWASP ZAP', 'DAST Testing'],
+        ].map(([name, desc]) => `
                         <div class="tool-item">
                             <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="20 6 9 17 4 12"/>
@@ -350,7 +350,7 @@ app.get('/', (req, res) => {
             </div>
 
             <footer class="footer">
-                Internship DevSecOps Project
+                DevSecOps Project
                 <span class="divider">/</span>
                 Automated CI/CD + Security Pipeline
             </footer>
@@ -362,5 +362,5 @@ app.get('/', (req, res) => {
 })
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
+    console.log(`Server running on port ${PORT}`)
 })
