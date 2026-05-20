@@ -290,7 +290,7 @@ app.get('/', (req, res) => {
                 <h1 class="title">DevSecOps<br><span>CI/CD Pipeline</span></h1>
                 <div class="status-badge">
                     <div class="pulse"></div>
-                    Deployment Successful
+                    Development Branch Deployment Successful
                 </div>
             </header>
 
