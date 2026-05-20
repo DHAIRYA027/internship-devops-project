@@ -13,7 +13,7 @@ app.get('/', (req, res) => {
     res.send(`
     <html>
     <head>
-        <title>DevSecOps Pipeline</title>
+        <title>Development Environment</title>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
