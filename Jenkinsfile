@@ -49,9 +49,14 @@ pipeline {
             }
         }
 
-        stage('Grype Image Scan') {
+        stage('Grype Vulnerability Scan') {
             steps {
-                sh 'grype dhairya2704/internship-app:latest || true'
+                sh '''
+                grype dhairya2704/internship-app:latest \
+                -o table > grype-report.txt || true
+                '''
+
+                archiveArtifacts artifacts: 'grype-report.txt', fingerprint: true
             }
         }
         
