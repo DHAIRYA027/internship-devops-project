@@ -19,7 +19,7 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                sh 'echo Tests Passed'
+                sh 'npm test'
             }
         }
 
