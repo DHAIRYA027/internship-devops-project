@@ -88,28 +88,30 @@ pipeline {
                 script {
 
                     sh '''
-                    nohup kubectl port-forward service/internship-service 3000:3000 > portforward.log 2>&1 &
+                    kubectl port-forward service/internship-service 3000:3000 > portforward.log 2>&1 &
                     sleep 15
                     '''
 
-                        def returnStatus = sh(
+                    def returnStatus = sh(
                         script: './scripts/health_check.sh',
                         returnStatus: true
-                        )
+                    )
 
-                        if (returnStatus != 0) {
+                    if (returnStatus != 0) {
 
-                            echo "Health check failed! Rolling back deployment..."
+                        echo "Health check failed! Rolling back deployment..."
 
-                            sh 'kubectl rollout undo deployment/internship-app'
+                        sh 'cat portforward.log || true'
 
-                            error("Deployment failed and rollback executed.")
+                        sh 'kubectl rollout undo deployment/internship-app'
 
-                        } else {
+                        error("Deployment failed and rollback executed.")
+
+                    } else {
 
                         echo "Health check passed successfully."
 
-                        }
+                    }
                 }
             
             }
