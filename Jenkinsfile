@@ -77,7 +77,7 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh 'kubectl rollout restart deployment internship-app'
+                sh 'kubectl apply -f deployment.yaml'
                 sh 'kubectl rollout status deployment/internship-app'
             }
         }
