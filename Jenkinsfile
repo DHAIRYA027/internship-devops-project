@@ -45,7 +45,7 @@ pipeline {
                 sh "docker build \
                     --build-arg APP_VERSION=1.0.${BUILD_NUMBER} \
                     --build-arg BUILD_NUMBER=${BUILD_NUMBER} \
-                    -t dhairya2704/internship-app:latest ."
+                    -t dhairya2704/internship-app:v1 ."
             }
         }
 
@@ -70,7 +70,7 @@ pipeline {
                     )
                 ]) {
                     sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
-                    sh 'docker push $DOCKER_IMAGE:latest'
+                    sh 'docker push $DOCKER_IMAGE:v1'
                 }
             }
         }
