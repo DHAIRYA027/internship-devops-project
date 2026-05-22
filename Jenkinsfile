@@ -76,6 +76,29 @@ pipeline {
             }
         }
 
+        stage('Health Check') {
+            steps {
+                sh './scripts/health-check.sh'
+            }
+        }
+
+        stage('Rollback if Failed'){
+            steps{
+                script{
+                    def status = sh(
+                        script: './scripts/health-check.sh',
+                        returnStatus: true
+                    )
+
+                    if(status != 0){
+                        sh 'kubectl rollout undo deployment/internship-app'
+
+                        error('Deployement Failed. Rollback Executed.')
+                    }
+                }
+            }
+        }
+
         stage('OWASP ZAP Scan') {
             steps {
                 sh '''
