@@ -78,7 +78,7 @@ pipeline {
         }
 
         stage('Health Check and Rollback'){
-            step{
+            steps{
                 script{
                     sleep(30)
                     def status = sh(
