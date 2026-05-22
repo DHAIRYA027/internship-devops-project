@@ -51,7 +51,7 @@ pipeline {
 
         stage('Grype Image Scan') {
             steps {
-                sh 'grype internship-devops-app:latest || true'
+                sh 'grype dhairya2704/internship-app:latest || true'
             }
         }
         
@@ -73,27 +73,26 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 sh 'kubectl rollout restart deployment internship-app'
+                sh 'kubectl rollout status deployment/internship-app'
             }
         }
 
-        stage('Health Check') {
-            steps {
-                sh './scripts/health-check.sh'
-            }
-        }
-
-        stage('Rollback if Failed'){
-            steps{
+        stage('Health Check and Rollback'){
+            step{
                 script{
+                    sleep(30)
                     def status = sh(
-                        script: './scripts/health-check.sh',
-                        returnStatus: true
+                        script: './scripts/health_check.sh',
+                        returnStatus = true
                     )
+                    if (status != 0){
+                        echo 'Deployment Failed. Rolling Back...'
 
-                    if(status != 0){
                         sh 'kubectl rollout undo deployment/internship-app'
 
-                        error('Deployement Failed. Rollback Executed.')
+                        error ('Rollback executed due to failed health check.')
+                    }else{
+                        echo 'Deployment Successful. Health check passed.'
                     }
                 }
             }
