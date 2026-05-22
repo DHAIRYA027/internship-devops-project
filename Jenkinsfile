@@ -7,6 +7,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'dhairya2704/internship-app'
+        DISCORD_WEBHOOK = credentials('discord-webhook')
     }
 
     stages {
@@ -132,12 +133,23 @@ pipeline {
     }
 
     post {
+
         success {
-            echo 'Pipeline executed successfully.'
+            sh '''
+            curl -H "Content-Type: application/json" \
+            -X POST \
+            -d '{"content":"✅ Jenkins Pipeline Succeeded for internship-devops-project"}' \
+            $DISCORD_WEBHOOK
+            '''
         }
 
         failure {
-            echo 'Pipeline failed.'
+            sh '''
+            curl -H "Content-Type: application/json" \
+         -X POST \
+         -d '{"content":"❌ Jenkins Pipeline FAILED for internship-devops-project"}' \
+         $DISCORD_WEBHOOK
+         '''
         }
     }
 }
