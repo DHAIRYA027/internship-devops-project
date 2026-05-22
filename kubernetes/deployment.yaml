@@ -21,7 +21,8 @@ spec:
 
       containers:
         - name: internship-app
-          image: dhairya2704/internship-app:v1
+          image: dhairya2704/internship-app:latest
+          imagePullPolicy: Always
 
           ports:
             - containerPort: 3000
