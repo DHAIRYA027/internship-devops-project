@@ -138,7 +138,7 @@ pipeline {
             sh '''
             curl -H "Content-Type: application/json" \
             -X POST \
-            -d '{"content":"✅ Jenkins Pipeline Succeeded for internship-devops-project"}' \
+            -d '{"content":"✅ Jenkins Pipeline Succeeded"}' \
             $DISCORD_WEBHOOK
             '''
         }
@@ -147,7 +147,7 @@ pipeline {
             sh '''
             curl -H "Content-Type: application/json" \
          -X POST \
-         -d '{"content":"❌ Jenkins Pipeline FAILED for internship-devops-project"}' \
+         -d '{"content":"❌ Jenkins Pipeline FAILED"}' \
          $DISCORD_WEBHOOK
          '''
         }
