@@ -82,6 +82,15 @@ pipeline {
             }
         }
 
+        stage('Port Forward Service') {
+            steps {
+                sh '''
+                nohup kubectl port-forward service/internship-service 3000:3000 > portforward.log 2>&1 &
+                sleep 10
+                '''
+            }
+        }
+
         stage('Health Check and Rollback') {
             steps {
                 script {
