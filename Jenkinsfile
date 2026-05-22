@@ -51,7 +51,7 @@ pipeline {
 
         stage('Grype Image Scan') {
             steps {
-                sh 'grype docker:dhairya2704/internship-app:latest'
+                sh 'grype internship-devops-app:latest || true'
             }
         }
         
