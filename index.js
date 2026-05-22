@@ -1,6 +1,6 @@
 const express = require('express')
 const os = require('node:os')
-throw new Error("Intentional failure for rollback testing")
+throw new Error("Intentional failure for Rollback testing")
 const app = express()
 
 app.disable('x-powered-by')
