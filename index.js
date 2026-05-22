@@ -1,6 +1,6 @@
 const express = require('express')
 const os = require('node:os')
-
+throw new Error("Intentional failure for rollback testing")
 const app = express()
 
 app.disable('x-powered-by')
@@ -363,6 +363,5 @@ app.get('/', (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
-    THIS_WILL_BREAK_APP
 })
 
