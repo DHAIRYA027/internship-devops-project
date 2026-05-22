@@ -1,6 +1,6 @@
 #!/bin/bash
 
-URL="http://127.0.0.1:64819"
+URL="http://localhost:3000"
 
 STATUS=$(curl -s -o /dev/null -w "%{http_code}" $URL)
 

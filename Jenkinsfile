@@ -86,25 +86,34 @@ pipeline {
         stage('Health Check and Rollback') {
             steps {
                 script {
-                    sleep 30
 
-                    def returnStatus = sh(
-                    script: './scripts/health_check.sh',
-                    returnStatus: true
-             )
+                    sh '''
+                    nohup kubectl port-forward service/internship-service 3000:3000 > portforward.log 2>&1 &
+                    sleep 15
+                    '''
 
-                if (returnStatus != 0) {
-                    echo "Health check failed! Rolling back deployment..."
+                        def returnStatus = sh(
+                        script: './scripts/health_check.sh',
+                        returnStatus: true
+                        )
 
-                    sh 'kubectl rollout undo deployment/internship-app'
+                        if (returnStatus != 0) {
 
-                    error("Deployment failed and rollback executed.")
-                } else {
-                    echo "Health check passed successfully."
+                            echo "Health check failed! Rolling back deployment..."
+
+                            sh 'kubectl rollout undo deployment/internship-app'
+
+                            error("Deployment failed and rollback executed.")
+
+                        } else {
+
+                        echo "Health check passed successfully."
+
+                        }
                 }
+            
             }
         }
-    }
 
         stage('OWASP ZAP Scan') {
             steps {
