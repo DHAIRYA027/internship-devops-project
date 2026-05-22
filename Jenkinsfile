@@ -82,26 +82,28 @@ pipeline {
             }
         }
 
-        stage('Health Check and Rollback'){
-            steps{
-                script{
-                    sleep(30)
-                    def status = sh(
-                        script: './scripts/health_check.sh',
-                        returnStatus = true
-                    )
-                    if (status != 0){
-                        echo 'Deployment Failed. Rolling Back...'
+        stage('Health Check and Rollback') {
+            steps {
+                script {
+                    sleep 30
 
-                        sh 'kubectl rollout undo deployment/internship-app'
+                    def returnStatus = sh(
+                    script: './scripts/health_check.sh',
+                    returnStatus: true
+             )
 
-                        error ('Rollback executed due to failed health check.')
-                    }else{
-                        echo 'Deployment Successful. Health check passed.'
-                    }
+                if (returnStatus != 0) {
+                    echo "Health check failed! Rolling back deployment..."
+
+                    sh 'kubectl rollout undo deployment/internship-app'
+
+                    error("Deployment failed and rollback executed.")
+                } else {
+                    echo "Health check passed successfully."
                 }
             }
         }
+    }
 
         stage('OWASP ZAP Scan') {
             steps {
