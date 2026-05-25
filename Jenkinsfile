@@ -122,21 +122,26 @@ pipeline {
     post {
 
         success {
-            sh '''
-            curl -H "Content-Type: application/json" \
-            -X POST \
-            -d '{"content":"✅ Jenkins Pipeline Succeeded"}' \
-            $DISCORD_WEBHOOK
-            '''
+            script {
+                sh """
+                curl -H "Content-Type: application/json" \
+                -X POST \
+                -d '{"content":"✅ Job: ${JOB_NAME}\\nBuild: #${BUILD_NUMBER}\\nStatus: SUCCESS"}' \
+                $DISCORD_WEBHOOK
+                """
+            }
         }
 
         failure {
-            sh '''
-            curl -H "Content-Type: application/json" \
-         -X POST \
-         -d '{"content":"❌ Jenkins Pipeline FAILED"}' \
-         $DISCORD_WEBHOOK
-         '''
+            script {
+                sh """
+                curl -H "Content-Type: application/json" \
+                -X POST \
+                -d '{"content":"❌ Job: ${JOB_NAME}\\nBuild: #${BUILD_NUMBER}\\nStatus: FAILED"}' \
+                $DISCORD_WEBHOOK
+                """
+            }
         }
     }
+}
 }
