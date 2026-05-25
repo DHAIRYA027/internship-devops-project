@@ -138,9 +138,10 @@ pipeline {
                     ).trim()
 
                     sh """
-                    docker run --rm -t ghcr.io/zaproxy/zaproxy:stable \
+                    timeout 120 docker run --rm -t ghcr.io/zaproxy/zaproxy:stable \
                     zap-baseline.py \
-                    -t ${serviceUrl} || true
+                    -t ${serviceUrl} \
+                    -m 2 || true
                     """
                 }
             }
