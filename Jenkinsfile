@@ -53,7 +53,7 @@ pipeline {
         stage('Grype Vulnerability Scan') {
             steps {
                 sh '''
-                grype dhairya2704/internship-app:latest \
+                grype dhairya2704/internship-app:v1 \
                 -o table > grype-report.txt || true
                 '''
 
@@ -80,7 +80,8 @@ pipeline {
             steps {
                 sh 'kubectl apply -f kubernetes/deployment.yaml'
                 sh 'kubectl apply -f kubernetes/service.yaml'
-                sh 'kubectl rollout status deployment/internship-app'
+
+                sh 'kubectl rollout status deployment/internship-app --timeout=90s'
             }
         }
 
@@ -88,13 +89,25 @@ pipeline {
             steps {
                 script {
 
-                    sh '''
-                    kubectl port-forward service/internship-service 3000:3000 > portforward.log 2>&1 &
-                    sleep 15
-                    '''
+                 sleep 20
+
+                    def serviceUrl = sh(
+                        script: "minikube service internship-service --url",
+                        returnStdout: true
+                    ).trim()
+
+                    echo "Checking health at ${serviceUrl}"
 
                     def returnStatus = sh(
-                        script: './scripts/health_check.sh',
+                        script: """
+                        STATUS=\$(curl -s -o /dev/null -w "%{http_code}" ${serviceUrl})
+
+                        if [ "\$STATUS" -eq 200 ]; then
+                            exit 0
+                        else
+                            exit 1
+                        fi
+                        """,
                         returnStatus: true
                     )
 
@@ -102,32 +115,34 @@ pipeline {
 
                         echo "Health check failed! Rolling back deployment..."
 
-                        sh 'cat portforward.log || true'
-
                         sh 'kubectl rollout undo deployment/internship-app'
 
                         error("Deployment failed and rollback executed.")
 
                     } else {
 
-                        echo "Health check passed successfully."
+                        echo "Application healthy."
 
                     }
                 }
-            
             }
         }
 
         stage('OWASP ZAP Scan') {
             steps {
-                sh '''
-                nohup kubectl port-forward service/internship-service 3000:3000 >/dev/null 2>&1 &
-                sleep 15
+                script {
 
-                docker run --rm -t ghcr.io/zaproxy/zaproxy:stable \
-                zap-baseline.py \
-                -t http://host.docker.internal:3000 || true
-                '''
+                    def serviceUrl = sh(
+                        script: "minikube service internship-service --url",
+                        returnStdout: true
+                    ).trim()
+
+                    sh """
+                    docker run --rm -t ghcr.io/zaproxy/zaproxy:stable \
+                    zap-baseline.py \
+                    -t ${serviceUrl} || true
+                    """
+                }
             }
         }
     }
