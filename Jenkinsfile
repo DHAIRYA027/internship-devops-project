@@ -91,54 +91,43 @@ pipeline {
 
                     sh 'sleep 5'
 
-                    def nodePort = sh(
+                    def serviceUrl = sh(
                         script: """
-                        kubectl get svc internship-service \
-                        -o=jsonpath='{.spec.ports[0].nodePort}'
+                        minikube service internship-service --url | head -n 1
                         """,
                         returnStdout: true
                     ).trim()
 
-                    def minikubeIp = sh(
-                        script: "minikube ip",
-                        returnStdout: true
-                    ).trim()
+                    echo "Service URL: ${serviceUrl}"
 
-                    def serviceUrl = "http://${minikubeIp}:${nodePort}"
+                    timeout(time: 30, unit: 'SECONDS') {
 
-                    echo "Checking health at ${serviceUrl}"
+                        def status = sh(
+                            script: """
+                            curl --max-time 10 \
+                            -s \
+                            -o /dev/null \
+                            -w "%{http_code}" \
+                            ${serviceUrl}
+                            """,
+                            returnStdout: true
+                        ).trim()
 
-                    def returnStatus = sh(
-                        script: """
-                        for i in {1..10}; do
+                        echo "HTTP Status: ${status}"
 
-                            STATUS=\$(curl -s -o /dev/null -w "%{http_code}" ${serviceUrl})
+                        if (status != "200") {
 
-                            if [ "\$STATUS" -eq 200 ]; then
-                                exit 0
-                            fi
+                            echo "Health check failed! Rolling back..."
 
-                            echo "Waiting for application..."
-                            sleep 3
-                        done
+                            sh 'kubectl rollout undo deployment/internship-app'
 
-                        exit 1
-                        """,
-                        returnStatus: true
-                    )
+                            error("Deployment failed.")
 
-                    if (returnStatus != 0) {
+                        } else {
 
-                        echo "Health check failed! Rolling back deployment..."
+                            echo "Application healthy."
 
-                        sh 'kubectl rollout undo deployment/internship-app'
-
-                        error("Deployment failed and rollback executed.")
-
-                    } else {
-
-                        echo "Application healthy."
-
+                        }
                     }
                 }
             }
@@ -148,23 +137,17 @@ pipeline {
             steps {
                 script {
 
-                    def nodePort = sh(
+                    def serviceUrl = sh(
                         script: """
-                         kubectl get svc internship-service \
-                        -o=jsonpath='{.spec.ports[0].nodePort}'
+                        minikube service internship-service --url | head -n 1
                         """,
-                        returnStdout: true
+                         returnStdout: true
                     ).trim()
 
-                    def minikubeIp = sh(
-                        script: "minikube ip",
-                        returnStdout: true
-                    ).trim()
-
-                    def serviceUrl = "http://${minikubeIp}:${nodePort}"
+                    echo "Running ZAP on ${serviceUrl}"
 
                     sh """
-                    docker run --rm -t ghcr.io/zaproxy/zaproxy:stable \
+                    docker run --rm --network host -t ghcr.io/zaproxy/zaproxy:stable \
                     zap-baseline.py \
                     -t ${serviceUrl} \
                     -m 1 || true
@@ -173,7 +156,7 @@ pipeline {
             }
         }
     }
-
+    
     post {
 
         success {
