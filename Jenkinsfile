@@ -89,24 +89,40 @@ pipeline {
             steps {
                 script {
 
-                 sleep 20
+                    sh 'sleep 5'
 
-                    def serviceUrl = sh(
-                        script: "minikube service internship-service --url",
+                    def nodePort = sh(
+                        script: """
+                        kubectl get svc internship-service \
+                        -o=jsonpath='{.spec.ports[0].nodePort}'
+                        """,
                         returnStdout: true
                     ).trim()
+
+                    def minikubeIp = sh(
+                        script: "minikube ip",
+                        returnStdout: true
+                    ).trim()
+
+                    def serviceUrl = "http://${minikubeIp}:${nodePort}"
 
                     echo "Checking health at ${serviceUrl}"
 
                     def returnStatus = sh(
                         script: """
-                        STATUS=\$(curl -s -o /dev/null -w "%{http_code}" ${serviceUrl})
+                        for i in {1..10}; do
 
-                        if [ "\$STATUS" -eq 200 ]; then
-                            exit 0
-                        else
-                            exit 1
-                        fi
+                            STATUS=\$(curl -s -o /dev/null -w "%{http_code}" ${serviceUrl})
+
+                            if [ "\$STATUS" -eq 200 ]; then
+                                exit 0
+                            fi
+
+                            echo "Waiting for application..."
+                            sleep 3
+                        done
+
+                        exit 1
                         """,
                         returnStatus: true
                     )
@@ -132,16 +148,26 @@ pipeline {
             steps {
                 script {
 
-                    def serviceUrl = sh(
-                        script: "minikube service internship-service --url",
+                    def nodePort = sh(
+                        script: """
+                         kubectl get svc internship-service \
+                        -o=jsonpath='{.spec.ports[0].nodePort}'
+                        """,
                         returnStdout: true
                     ).trim()
 
+                    def minikubeIp = sh(
+                        script: "minikube ip",
+                        returnStdout: true
+                    ).trim()
+
+                    def serviceUrl = "http://${minikubeIp}:${nodePort}"
+
                     sh """
-                    timeout 120 docker run --rm -t ghcr.io/zaproxy/zaproxy:stable \
+                    docker run --rm -t ghcr.io/zaproxy/zaproxy:stable \
                     zap-baseline.py \
                     -t ${serviceUrl} \
-                    -m 2 || true
+                    -m 1 || true
                     """
                 }
             }
