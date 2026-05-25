@@ -111,7 +111,7 @@ pipeline {
 
                     } else {
 
-                        echo "Application healthy."
+                        echo "Application Healthy."
 
                     }
                 }
