@@ -89,45 +89,37 @@ pipeline {
             steps {
                 script {
 
-                    sh 'sleep 5'
+                    sh '''
+                    kubectl port-forward service/internship-service 3000:3000 >/dev/null 2>&1 &
+                    sleep 15
+                    '''
 
-                    def serviceUrl = sh(
-                        script: """
-                        minikube service internship-service --url | head -n 1
-                        """,
-                        returnStdout: true
-                    ).trim()
+                    def returnStatus = sh(
+                        script: '''
+                        STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000)
 
-                    echo "Service URL: ${serviceUrl}"
+                        if [ "$STATUS" -eq 200 ]; then
+                            exit 0
+                        else
+                            
+                            exit 1
+                        fi
+                        ''',
+                        returnStatus: true
+                    )
 
-                    timeout(time: 30, unit: 'SECONDS') {
+                    if (returnStatus != 0) {
 
-                        def status = sh(
-                            script: """
-                            curl --max-time 10 \
-                            -s \
-                            -o /dev/null \
-                            -w "%{http_code}" \
-                            ${serviceUrl}
-                            """,
-                            returnStdout: true
-                        ).trim()
+                        echo "Health check failed! Rolling back deployment..."
 
-                        echo "HTTP Status: ${status}"
+                        sh 'kubectl rollout undo deployment/internship-app'
 
-                        if (status != "200") {
+                        error("Deployment failed and rollback executed.")
 
-                            echo "Health check failed! Rolling back..."
+                    } else {
 
-                            sh 'kubectl rollout undo deployment/internship-app'
+                        echo "Application healthy."
 
-                            error("Deployment failed.")
-
-                        } else {
-
-                            echo "Application healthy."
-
-                        }
                     }
                 }
             }
