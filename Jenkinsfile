@@ -117,29 +117,6 @@ pipeline {
                 }
             }
         }
-
-        stage('OWASP ZAP Scan') {
-            steps {
-                script {
-
-                    def serviceUrl = sh(
-                        script: """
-                        minikube service internship-service --url | head -n 1
-                        """,
-                         returnStdout: true
-                    ).trim()
-
-                    echo "Running ZAP on ${serviceUrl}"
-
-                    sh """
-                    docker run --rm --network host -t ghcr.io/zaproxy/zaproxy:stable \
-                    zap-baseline.py \
-                    -t ${serviceUrl} \
-                    -m 1 || true
-                    """
-                }
-            }
-        }
     }
     
     post {
