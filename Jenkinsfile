@@ -89,28 +89,21 @@ pipeline {
             steps {
                 script {
 
-                    sh '''
-                    kubectl port-forward service/internship-service 3000:3000 >/dev/null 2>&1 &
                     sleep 15
-                    '''
 
-                    def returnStatus = sh(
+                    def podStatus = sh(
                         script: '''
-                        STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000)
-
-                        if [ "$STATUS" -eq 200 ]; then
-                            exit 0
-                        else
-                            
-                            exit 1
-                        fi
+                        kubectl get pods -l app=internship-app \
+                        -o jsonpath="{.items[*].status.containerStatuses[*].ready}"
                         ''',
-                        returnStatus: true
-                    )
+                        returnStdout: true
+                    ).trim()
 
-                    if (returnStatus != 0) {
+                    echo "Pod readiness: ${podStatus}"
 
-                        echo "Health check failed! Rolling back deployment..."
+                    if (!podStatus.contains("true")) {
+
+                        echo "Application unhealthy! Rolling back deployment..."
 
                         sh 'kubectl rollout undo deployment/internship-app'
 
