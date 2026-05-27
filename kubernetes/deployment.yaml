@@ -23,7 +23,7 @@ spec:
 
       containers:
         - name: internship-app
-          image: IMAGE_PLACEHOLDER
+          image: dhairya2704/internship-app:1
           ports:
             - containerPort: 3000
 
