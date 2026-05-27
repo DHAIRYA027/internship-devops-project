@@ -13,3 +13,8 @@ describe('GET /', () => {
         expect(response.statusCode).toBe(200)
     })
 })
+describe('Basic Test', () => {
+    test('Sample test should pass', () => {
+        expect(1 + 1).toBe(2)
+    })
+})
