@@ -87,7 +87,7 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes') {
+       stage('Deploy to Kubernetes') {
             steps {
 
                 script {
@@ -95,10 +95,20 @@ pipeline {
                     echo "Deploying build ${BUILD_NUMBER} to ${KUBE_NAMESPACE}"
 
                     sh """
-                    sed -i '' 's|IMAGE_PLACEHOLDER|${DOCKER_IMAGE}:${BUILD_NUMBER}|' kubernetes/deployment.yaml
-
                     kubectl apply -f kubernetes/deployment.yaml -n ${KUBE_NAMESPACE}
+                    """
 
+                    sh """
+                    kubectl set image deployment/internship-app \
+                    internship-app=${DOCKER_IMAGE}:${BUILD_NUMBER} \
+                    -n ${KUBE_NAMESPACE}
+                    """
+
+                    sh """
+                    kubectl rollout restart deployment/internship-app -n ${KUBE_NAMESPACE}
+                    """
+
+                    sh """
                     kubectl rollout status deployment/internship-app \
                     -n ${KUBE_NAMESPACE} \
                     --timeout=90s

@@ -23,9 +23,7 @@ spec:
 
       containers:
         - name: internship-app
-          image: IMAGE_PLACEHOLDER
-          imagePullPolicy: Always
-
+          
           ports:
             - containerPort: 3000
 
