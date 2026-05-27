@@ -92,11 +92,10 @@ pipeline {
 
                 script {
 
-                    echo "Deploying to namespace: ${KUBE_NAMESPACE}"
+                    echo "Deploying branch ${BRANCH_NAME} to namespace ${KUBE_NAMESPACE}"
 
                     sh """
                     kubectl apply -f kubernetes/deployment.yaml -n ${KUBE_NAMESPACE}
-                    """
 
                     if [ "${KUBE_NAMESPACE}" = "dev" ]; then
                         kubectl apply -f kubernetes/service-dev.yaml -n dev
@@ -106,7 +105,6 @@ pipeline {
                         kubectl apply -f kubernetes/service-prod.yaml -n prod
                     fi
 
-                    sh """
                     kubectl rollout status deployment/internship-app \
                     -n ${KUBE_NAMESPACE} \
                     --timeout=90s
