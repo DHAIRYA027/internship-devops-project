@@ -1,6 +1,10 @@
 const express = require('express')
 const os = require('node:os')
 const app = express()
+const client = require('prom-client')
+const collectDefaultMetrics = client.collectDefaultMetrics
+
+collectDefaultMetrics()
 
 app.disable('x-powered-by')
 
@@ -358,6 +362,11 @@ app.get('/', (req, res) => {
     </body>
     </html>
   `)
+})
+
+app.get('/metrics', async (req, res) => {
+    res.set('Content-Type', client.register.contentType)
+    res.end(await client.register.metrics())
 })
 
 app.listen(PORT, () => {
