@@ -96,19 +96,7 @@ pipeline {
 
                     sh """
                     kubectl apply -f kubernetes/deployment.yaml -n ${KUBE_NAMESPACE}
-                    """
 
-                    sh """
-                    kubectl set image deployment/internship-app \
-                    internship-app=${DOCKER_IMAGE}:${BUILD_NUMBER} \
-                    -n ${KUBE_NAMESPACE}
-                    """
-
-                    sh """
-                    kubectl rollout restart deployment/internship-app -n ${KUBE_NAMESPACE}
-                    """
-
-                    sh """
                     kubectl rollout status deployment/internship-app \
                     -n ${KUBE_NAMESPACE} \
                     --timeout=90s
