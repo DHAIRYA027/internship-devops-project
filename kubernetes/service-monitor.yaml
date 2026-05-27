@@ -1,0 +1,25 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+
+metadata:
+  name: internship-app-monitor
+  namespace: default
+
+  labels:
+    release: monitoring
+
+spec:
+  namespaceSelector:
+    matchNames:
+      - dev
+      - qa
+      - prod
+
+  selector:
+    matchLabels:
+      app: internship-app
+
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s

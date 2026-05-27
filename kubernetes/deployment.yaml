@@ -3,6 +3,8 @@ kind: Deployment
 
 metadata:
   name: internship-app
+  labels:
+    app: internship-app
 
 spec:
   replicas: 2
