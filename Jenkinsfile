@@ -101,12 +101,20 @@ pipeline {
                     internship-app=${DOCKER_IMAGE}:${BUILD_NUMBER} \
                     -n ${KUBE_NAMESPACE}
 
+                    if [ "${KUBE_NAMESPACE}" = "dev" ]; then
+                        kubectl apply -f kubernetes/service-dev.yaml -n dev
+                    elif [ "${KUBE_NAMESPACE}" = "qa" ]; then
+                        kubectl apply -f kubernetes/service-qa.yaml -n qa
+                    else
+                        kubectl apply -f kubernetes/service-prod.yaml -n prod
+                    fi
+
                     kubectl rollout status deployment/internship-app \
                     -n ${KUBE_NAMESPACE} \
                     --timeout=90s
                     """
                 }
-             }
+            }
         }
 
         stage('Health Check and Rollback') {
