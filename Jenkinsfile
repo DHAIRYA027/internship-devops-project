@@ -46,9 +46,7 @@ pipeline {
             steps {
                 sh """
                 docker build \
-                --build-arg APP_VERSION=1.0.${BUILD_NUMBER} \
-                --build-arg BUILD_NUMBER=${BUILD_NUMBER} \
-                -t dhairya2704/internship-app:${BUILD_NUMBER} .
+                -t ${DOCKER_IMAGE}:${BUILD_NUMBER} .
                 """
             }
         }
@@ -56,7 +54,7 @@ pipeline {
         stage('Grype Vulnerability Scan') {
             steps {
                 sh '''
-                grype dhairya2704/internship-app:v1.${BUILD_NUMBER} \
+                grype ${DOCKER_IMAGE}:${BUILD_NUMBER} \
                 -o table > grype-report.txt || true
                 '''
 
@@ -73,8 +71,10 @@ pipeline {
                         passwordVariable: 'DOCKER_PASS'
                     )
                 ]) {
+
                     sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
-                    sh 'docker push $DOCKER_IMAGE:${BUILD_NUMBER}'
+
+                    sh "docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}"
                 }
             }
         }
@@ -95,26 +95,18 @@ pipeline {
                     echo "Deploying branch ${BRANCH_NAME} to namespace ${KUBE_NAMESPACE}"
 
                     sh """
-                    sed -i '' 's|image: .*|image: dhairya2704/internship-app:${BUILD_NUMBER}|' kubernetes/deployment.yaml
-                    """
-
-                    sh """
                     kubectl apply -f kubernetes/deployment.yaml -n ${KUBE_NAMESPACE}
 
-                    if [ "${KUBE_NAMESPACE}" = "dev" ]; then
-                        kubectl apply -f kubernetes/service-dev.yaml -n dev
-                    elif [ "${KUBE_NAMESPACE}" = "qa" ]; then
-                        kubectl apply -f kubernetes/service-qa.yaml -n qa
-                    else
-                        kubectl apply -f kubernetes/service-prod.yaml -n prod
-                    fi
+                    kubectl set image deployment/internship-app \
+                    internship-app=${DOCKER_IMAGE}:${BUILD_NUMBER} \
+                    -n ${KUBE_NAMESPACE}
 
                     kubectl rollout status deployment/internship-app \
                     -n ${KUBE_NAMESPACE} \
                     --timeout=90s
                     """
                 }
-            }
+             }
         }
 
         stage('Health Check and Rollback') {
