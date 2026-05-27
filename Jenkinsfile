@@ -43,17 +43,19 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh "docker build \
-                    --build-arg APP_VERSION=1.0.${BUILD_NUMBER} \
-                    --build-arg BUILD_NUMBER=${BUILD_NUMBER} \
-                    -t dhairya2704/internship-app:v1 ."
+                sh """
+                docker build \
+                --build-arg APP_VERSION=1.0.${BUILD_NUMBER} \
+                --build-arg BUILD_NUMBER=${BUILD_NUMBER} \
+                -t dhairya2704/internship-app:v1.${BUILD_NUMBER} .
+                """
             }
         }
 
         stage('Grype Vulnerability Scan') {
             steps {
                 sh '''
-                grype dhairya2704/internship-app:v1 \
+                grype dhairya2704/internship-app:v1.${BUILD_NUMBER} \
                 -o table > grype-report.txt || true
                 '''
 
@@ -71,8 +73,16 @@ pipeline {
                     )
                 ]) {
                     sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
-                    sh 'docker push $DOCKER_IMAGE:v1'
+                    sh 'docker push $DOCKER_IMAGE:v1.${BUILD_NUMBER}'
                 }
+            }
+        }
+
+        stage('Update Kubernetes Manifest') {
+            steps {
+                sh """
+                sed -i '' 's|image:.*|image: dhairya2704/internship-app:v1.${BUILD_NUMBER}|' kubernetes/deployment.yaml
+                """
             }
         }
 
