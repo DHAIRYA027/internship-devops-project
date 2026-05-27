@@ -8,6 +8,7 @@ pipeline {
     environment {
         DOCKER_IMAGE = 'dhairya2704/internship-app'
         DISCORD_WEBHOOK = credentials('discord-webhook')
+        KUBE_NAMESPACE = "${env.BRANCH_NAME == 'dev' ? 'dev' : env.BRANCH_NAME == 'qa' ? 'qa' : 'prod'}"
     }
 
     stages {
@@ -88,10 +89,29 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh 'kubectl apply -f kubernetes/deployment.yaml'
-                sh 'kubectl apply -f kubernetes/service.yaml'
 
-                sh 'kubectl rollout status deployment/internship-app --timeout=90s'
+                script {
+
+                    echo "Deploying to namespace: ${KUBE_NAMESPACE}"
+
+                    sh """
+                    kubectl apply -f kubernetes/deployment.yaml -n ${KUBE_NAMESPACE}
+                    """
+
+                    if [ "${KUBE_NAMESPACE}" = "dev" ]; then
+                        kubectl apply -f kubernetes/service-dev.yaml -n dev
+                    elif [ "${KUBE_NAMESPACE}" = "qa" ]; then
+                        kubectl apply -f kubernetes/service-qa.yaml -n qa
+                    else
+                        kubectl apply -f kubernetes/service-prod.yaml -n prod
+                    fi
+
+                    sh """
+                    kubectl rollout status deployment/internship-app \
+                    -n ${KUBE_NAMESPACE} \
+                    --timeout=90s
+                    """
+                }
             }
         }
 
@@ -103,7 +123,7 @@ pipeline {
 
                     def podStatus = sh(
                         script: '''
-                        kubectl get pods -l app=internship-app \
+                        kubectl get pods -n ${KUBE_NAMESPACE} -l app=internship-app \
                         -o jsonpath="{.items[*].status.containerStatuses[*].ready}"
                         ''',
                         returnStdout: true
@@ -115,7 +135,7 @@ pipeline {
 
                         echo "Application unhealthy! Rolling back deployment..."
 
-                        sh 'kubectl rollout undo deployment/internship-app'
+                        sh 'kubectl rollout undo deployment/internship-app -n ${KUBE_NAMESPACE}'
 
                         error("Deployment failed and rollback executed.")
 
