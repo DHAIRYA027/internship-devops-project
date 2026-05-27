@@ -23,7 +23,7 @@ spec:
 
       containers:
         - name: internship-app
-          image: dhairya2704/internship-app:v1
+          image: dhairya2704/internship-app:${BUILD_NUMBER}
           imagePullPolicy: Always
 
           ports:

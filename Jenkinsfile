@@ -48,7 +48,7 @@ pipeline {
                 docker build \
                 --build-arg APP_VERSION=1.0.${BUILD_NUMBER} \
                 --build-arg BUILD_NUMBER=${BUILD_NUMBER} \
-                -t dhairya2704/internship-app:v1.${BUILD_NUMBER} .
+                -t dhairya2704/internship-app:${BUILD_NUMBER} .
                 """
             }
         }
@@ -74,7 +74,7 @@ pipeline {
                     )
                 ]) {
                     sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
-                    sh 'docker push $DOCKER_IMAGE:v1.${BUILD_NUMBER}'
+                    sh 'docker push $DOCKER_IMAGE:${BUILD_NUMBER}'
                 }
             }
         }
@@ -82,7 +82,7 @@ pipeline {
         stage('Update Kubernetes Manifest') {
             steps {
                 sh """
-                sed -i '' 's|image:.*|image: dhairya2704/internship-app:v1.${BUILD_NUMBER}|' kubernetes/deployment.yaml
+                sed -i '' 's|image:.*|image: dhairya2704/internship-app:${BUILD_NUMBER}|' kubernetes/deployment.yaml
                 """
             }
         }
@@ -93,6 +93,10 @@ pipeline {
                 script {
 
                     echo "Deploying branch ${BRANCH_NAME} to namespace ${KUBE_NAMESPACE}"
+
+                    sh """
+                    sed -i '' 's|image: .*|image: dhairya2704/internship-app:${BUILD_NUMBER}|' kubernetes/deployment.yaml
+                    """
 
                     sh """
                     kubectl apply -f kubernetes/deployment.yaml -n ${KUBE_NAMESPACE}
