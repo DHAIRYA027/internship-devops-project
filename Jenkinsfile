@@ -35,7 +35,7 @@ pipeline {
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
                     bat """
                         C:\\JenkinsHome\\tools\\hudson.plugins.sonar.SonarRunnerInstallation\\SonarScanner\\bin\\sonar-scanner.bat ^
-                        -Dsonar.projectKey=internship-devops ^
+                        -Dsonar.projectKey=devops-project ^
                         -Dsonar.sources=. ^
                         -Dsonar.host.url=http://localhost:9000 ^
                         -Dsonar.token=%SONAR_TOKEN% ^
@@ -44,7 +44,6 @@ pipeline {
                 }
             }
         }
-
         stage('Build Docker Image') {
             steps {
                 bat "docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} ."
