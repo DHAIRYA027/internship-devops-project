@@ -113,12 +113,12 @@ pipeline {
     post {
         success {
             bat """
-                curl -H "Content-Type: application/json" -X POST -d "{\\"content\\":\\"✅ Job: %JOB_NAME% Build: #%BUILD_NUMBER% Status: SUCCESS\\"}" %DISCORD_WEBHOOK%
+                curl -H "Content-Type: application/json" -X POST -d "{\\"content\\":\\"BUILD PASSED - Job: %JOB_NAME% Build: #%BUILD_NUMBER%\\"}" %DISCORD_WEBHOOK%
             """
         }
         failure {
             bat """
-                curl -H "Content-Type: application/json" -X POST -d "{\\"content\\":\\"❌ Job: %JOB_NAME% Build: #%BUILD_NUMBER% Status: FAILED\\"}" %DISCORD_WEBHOOK%
+                curl -H "Content-Type: application/json" -X POST -d "{\\"content\\":\\"BUILD FAILED - Job: %JOB_NAME% Build: #%BUILD_NUMBER%\\"}" %DISCORD_WEBHOOK%
             """
         }
     }
