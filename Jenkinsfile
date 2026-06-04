@@ -47,10 +47,13 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'mac-ssh', keyFileVariable: 'SSH_KEY')]) {
+                withCredentials([
+                    sshUserPrivateKey(credentialsId: 'mac-ssh', keyFileVariable: 'SSH_KEY'),
+                    usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')
+                ]) {
                     bat """
                         icacls "%SSH_KEY%" /inheritance:r /grant:r "%USERNAME%:F"
-                        ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no dhairya@100.90.56.19 "export PATH=/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin && cd /Users/dhairya/Downloads/internship-devops-project && docker build -t dhairya2704/internship-app:%BUILD_NUMBER% ."
+                        ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no dhairya@100.90.56.19 "export PATH=/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin && export DOCKER_CONFIG=/tmp/jenkins-docker && echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin && cd /Users/dhairya/Downloads/internship-devops-project && docker build -t dhairya2704/internship-app:%BUILD_NUMBER% ."
                     """
                 }
             }
@@ -61,7 +64,7 @@ pipeline {
                 withCredentials([sshUserPrivateKey(credentialsId: 'mac-ssh', keyFileVariable: 'SSH_KEY')]) {
                     bat """
                         icacls "%SSH_KEY%" /inheritance:r /grant:r "%USERNAME%:F"
-                        ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no dhairya@100.90.56.19 "export PATH=/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin && grype dhairya2704/internship-app:%BUILD_NUMBER% -o table > /tmp/grype-report.txt || true"
+                        ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no dhairya@100.90.56.19 "export PATH=/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin && export DOCKER_CONFIG=/tmp/jenkins-docker && grype dhairya2704/internship-app:%BUILD_NUMBER% -o table > /tmp/grype-report.txt || true"
                     """
                 }
             }
@@ -72,7 +75,7 @@ pipeline {
                 withCredentials([sshUserPrivateKey(credentialsId: 'mac-ssh', keyFileVariable: 'SSH_KEY')]) {
                     bat """
                         icacls "%SSH_KEY%" /inheritance:r /grant:r "%USERNAME%:F"
-                        ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no dhairya@100.90.56.19 "export PATH=/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin && docker push dhairya2704/internship-app:%BUILD_NUMBER%"
+                        ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no dhairya@100.90.56.19 "export PATH=/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin && export DOCKER_CONFIG=/tmp/jenkins-docker && docker push dhairya2704/internship-app:%BUILD_NUMBER%"
                     """
                 }
             }
