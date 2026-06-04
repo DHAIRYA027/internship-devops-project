@@ -85,8 +85,10 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                    bat "kubectl apply -f kubernetes/deployment.yaml"
-                    bat "kubectl rollout status deployment/internship-app --timeout=90s"
+                    withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+                        bat "kubectl apply -f kubernetes/deployment.yaml"
+                        bat "kubectl rollout status deployment/internship-app --timeout=90s"
+                    }
                 }
             }
         }
