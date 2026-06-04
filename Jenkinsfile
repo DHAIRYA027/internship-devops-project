@@ -47,36 +47,39 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                withCredentials([
-                    sshUserPrivateKey(credentialsId: 'mac-ssh', keyFileVariable: 'SSH_KEY'),
-                    usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')
-                ]) {
-                    bat """
-                        icacls "%SSH_KEY%" /inheritance:r /grant:r "%USERNAME%:F"
-                        ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no dhairya@100.90.56.19 "export PATH=/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin && mkdir -p /tmp/jenkins-docker && echo eyJjcmVkc1N0b3JlIjoiIn0= | base64 -d > /tmp/jenkins-docker/config.json && export DOCKER_CONFIG=/tmp/jenkins-docker && echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin && cd /Users/dhairya/Downloads/internship-devops-project && docker build -t dhairya2704/internship-app:%BUILD_NUMBER% ."
-                    """
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    withCredentials([sshUserPrivateKey(credentialsId: 'mac-ssh', keyFileVariable: 'SSH_KEY')]) {
+                        bat """
+                            icacls "%SSH_KEY%" /inheritance:r /grant:r "%USERNAME%:F"
+                            ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no dhairya@100.90.56.19 "/Users/dhairya/fix-docker-config.sh && cd /Users/dhairya/Downloads/internship-devops-project && /usr/local/bin/docker build -t dhairya2704/internship-app:%BUILD_NUMBER% -t dhairya2704/internship-app:latest ."
+                        """
+                    }
                 }
             }
         }
 
         stage('Grype Vulnerability Scan') {
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'mac-ssh', keyFileVariable: 'SSH_KEY')]) {
-                    bat """
-                        icacls "%SSH_KEY%" /inheritance:r /grant:r "%USERNAME%:F"
-                        ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no dhairya@100.90.56.19 "export PATH=/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin && export DOCKER_CONFIG=/tmp/jenkins-docker && grype dhairya2704/internship-app:%BUILD_NUMBER% -o table > /tmp/grype-report.txt || true"
-                    """
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    withCredentials([sshUserPrivateKey(credentialsId: 'mac-ssh', keyFileVariable: 'SSH_KEY')]) {
+                        bat """
+                            icacls "%SSH_KEY%" /inheritance:r /grant:r "%USERNAME%:F"
+                            ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no dhairya@100.90.56.19 "grype dhairya2704/internship-app:%BUILD_NUMBER% -o table > /tmp/grype-report.txt || true"
+                        """
+                    }
                 }
             }
         }
 
         stage('Push Docker Image') {
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'mac-ssh', keyFileVariable: 'SSH_KEY')]) {
-                    bat """
-                        icacls "%SSH_KEY%" /inheritance:r /grant:r "%USERNAME%:F"
-                        ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no dhairya@100.90.56.19 "export PATH=/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin && export DOCKER_CONFIG=/tmp/jenkins-docker && docker push dhairya2704/internship-app:%BUILD_NUMBER%"
-                    """
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    withCredentials([sshUserPrivateKey(credentialsId: 'mac-ssh', keyFileVariable: 'SSH_KEY')]) {
+                        bat """
+                            icacls "%SSH_KEY%" /inheritance:r /grant:r "%USERNAME%:F"
+                            ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no dhairya@100.90.56.19 "/Users/dhairya/fix-docker-config.sh && /usr/local/bin/docker push dhairya2704/internship-app:%BUILD_NUMBER% && /usr/local/bin/docker push dhairya2704/internship-app:latest"
+                        """
+                    }
                 }
             }
         }
