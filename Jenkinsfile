@@ -64,7 +64,7 @@ pipeline {
                     withCredentials([sshUserPrivateKey(credentialsId: 'mac-ssh', keyFileVariable: 'SSH_KEY')]) {
                         bat """
                             icacls "%SSH_KEY%" /inheritance:r /grant:r "%USERNAME%:F"
-                            ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no dhairya@100.90.56.19 "grype dhairya2704/internship-app:%BUILD_NUMBER% -o table > /tmp/grype-report.txt || true"
+                            ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no dhairya@100.90.56.19 "/opt/homebrew/bin/grype dhairya2704/internship-app:%BUILD_NUMBER% -o table > /tmp/grype-report.txt || true"
                         """
                     }
                 }
