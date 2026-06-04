@@ -53,7 +53,7 @@ pipeline {
                 ]) {
                     bat """
                         icacls "%SSH_KEY%" /inheritance:r /grant:r "%USERNAME%:F"
-                        ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no dhairya@100.90.56.19 "export PATH=/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin && export DOCKER_CONFIG=/tmp/jenkins-docker && echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin && cd /Users/dhairya/Downloads/internship-devops-project && docker build -t dhairya2704/internship-app:%BUILD_NUMBER% ."
+                        ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no dhairya@100.90.56.19 "export PATH=/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin && mkdir -p /tmp/jenkins-docker && echo '{ \\\"credsStore\\\": \\\"\\\" }' > /tmp/jenkins-docker/config.json && export DOCKER_CONFIG=/tmp/jenkins-docker && echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin && cd /Users/dhairya/Downloads/internship-devops-project && docker build -t dhairya2704/internship-app:%BUILD_NUMBER% ."
                     """
                 }
             }
