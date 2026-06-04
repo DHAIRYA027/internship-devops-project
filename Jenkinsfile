@@ -47,7 +47,12 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                    bat "docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} ."
+                    withCredentials([sshUserPrivateKey(credentialsId: 'mac-ssh', keyFileVariable: 'SSH_KEY')]) {
+                        bat """
+                            ssh -i %SSH_KEY% -o StrictHostKeyChecking=no dhairya@100.90.56.19 ^
+                            "cd ~/path/to/internship-devops-project && docker build -t dhairya2704/internship-app:%BUILD_NUMBER% ."
+                        """
+                    }
                 }
             }
         }
@@ -55,8 +60,12 @@ pipeline {
         stage('Grype Vulnerability Scan') {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                    bat "grype ${DOCKER_IMAGE}:${BUILD_NUMBER} -o table > grype-report.txt || exit 0"
-                    archiveArtifacts artifacts: 'grype-report.txt', fingerprint: true
+                    withCredentials([sshUserPrivateKey(credentialsId: 'mac-ssh', keyFileVariable: 'SSH_KEY')]) {
+                        bat """
+                            ssh -i %SSH_KEY% -o StrictHostKeyChecking=no dhairya@100.90.56.19 ^
+                            "grype dhairya2704/internship-app:%BUILD_NUMBER% -o table > /tmp/grype-report.txt || true"
+                        """
+                    }
                 }
             }
         }
@@ -64,9 +73,14 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        bat 'docker login -u %DOCKER_USER% -p %DOCKER_PASS%'
-                        bat "docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}"
+                    withCredentials([
+                        sshUserPrivateKey(credentialsId: 'mac-ssh', keyFileVariable: 'SSH_KEY'),
+                        usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')
+                    ]) {
+                        bat """
+                            ssh -i %SSH_KEY% -o StrictHostKeyChecking=no dhairya@100.90.56.19 ^
+                            "docker push dhairya2704/internship-app:%BUILD_NUMBER%"
+                        """
                     }
                 }
             }
