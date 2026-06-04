@@ -46,39 +46,33 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                    withCredentials([sshUserPrivateKey(credentialsId: 'mac-ssh', keyFileVariable: 'SSH_KEY')]) {
-                        bat """
-                            icacls "%SSH_KEY%" /inheritance:r /grant:r "%USERNAME%:F"
-                            ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no dhairya@100.90.56.19 "cd /Users/dhairya/Downloads/internship-devops-project && docker build -t dhairya2704/internship-app:%BUILD_NUMBER% ."
-                        """
-                    }
+                withCredentials([sshUserPrivateKey(credentialsId: 'mac-ssh', keyFileVariable: 'SSH_KEY')]) {
+                    bat """
+                        icacls "%SSH_KEY%" /inheritance:r /grant:r "%USERNAME%:F"
+                        ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no dhairya@100.90.56.19 "export PATH=/usr/local/bin:/opt/homebrew/bin:\\$PATH && cd /Users/dhairya/Downloads/internship-devops-project && docker build -t dhairya2704/internship-app:%BUILD_NUMBER% ."
+                    """
                 }
             }
         }
 
         stage('Grype Vulnerability Scan') {
             steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                    withCredentials([sshUserPrivateKey(credentialsId: 'mac-ssh', keyFileVariable: 'SSH_KEY')]) {
-                        bat """
-                            icacls "%SSH_KEY%" /inheritance:r /grant:r "%USERNAME%:F"
-                            ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no dhairya@100.90.56.19 "grype dhairya2704/internship-app:%BUILD_NUMBER% -o table > /tmp/grype-report.txt || true"
-                        """
-                    }
+                withCredentials([sshUserPrivateKey(credentialsId: 'mac-ssh', keyFileVariable: 'SSH_KEY')]) {
+                    bat """
+                        icacls "%SSH_KEY%" /inheritance:r /grant:r "%USERNAME%:F"
+                        ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no dhairya@100.90.56.19 "export PATH=/usr/local/bin:/opt/homebrew/bin:\\$PATH && grype dhairya2704/internship-app:%BUILD_NUMBER% -o table > /tmp/grype-report.txt || true"
+                    """
                 }
             }
         }
 
         stage('Push Docker Image') {
             steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                    withCredentials([sshUserPrivateKey(credentialsId: 'mac-ssh', keyFileVariable: 'SSH_KEY')]) {
-                        bat """
-                            icacls "%SSH_KEY%" /inheritance:r /grant:r "%USERNAME%:F"
-                            ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no dhairya@100.90.56.19 "docker push dhairya2704/internship-app:%BUILD_NUMBER%"
-                        """
-                    }
+                withCredentials([sshUserPrivateKey(credentialsId: 'mac-ssh', keyFileVariable: 'SSH_KEY')]) {
+                    bat """
+                        icacls "%SSH_KEY%" /inheritance:r /grant:r "%USERNAME%:F"
+                        ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no dhairya@100.90.56.19 "export PATH=/usr/local/bin:/opt/homebrew/bin:\\$PATH && docker push dhairya2704/internship-app:%BUILD_NUMBER%"
+                    """
                 }
             }
         }
@@ -95,7 +89,7 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
                     withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
                         bat "kubectl apply -f kubernetes/deployment.yaml"
                         bat "kubectl rollout status deployment/internship-app --timeout=90s"
