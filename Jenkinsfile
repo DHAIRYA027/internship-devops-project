@@ -49,8 +49,8 @@ pipeline {
                 catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                     withCredentials([sshUserPrivateKey(credentialsId: 'mac-ssh', keyFileVariable: 'SSH_KEY')]) {
                         bat """
-                            ssh -i %SSH_KEY% -o StrictHostKeyChecking=no dhairya@100.90.56.19 ^
-                            "cd ~/path/to/internship-devops-project && docker build -t dhairya2704/internship-app:%BUILD_NUMBER% ."
+                            icacls "%SSH_KEY%" /inheritance:r /grant:r "%USERNAME%:F"
+                            ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no dhairya@100.90.56.19 "cd /Users/dhairya/Downloads/internship-devops-project && docker build -t dhairya2704/internship-app:%BUILD_NUMBER% ."
                         """
                     }
                 }
@@ -62,8 +62,8 @@ pipeline {
                 catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                     withCredentials([sshUserPrivateKey(credentialsId: 'mac-ssh', keyFileVariable: 'SSH_KEY')]) {
                         bat """
-                            ssh -i %SSH_KEY% -o StrictHostKeyChecking=no dhairya@100.90.56.19 ^
-                            "grype dhairya2704/internship-app:%BUILD_NUMBER% -o table > /tmp/grype-report.txt || true"
+                            icacls "%SSH_KEY%" /inheritance:r /grant:r "%USERNAME%:F"
+                            ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no dhairya@100.90.56.19 "grype dhairya2704/internship-app:%BUILD_NUMBER% -o table > /tmp/grype-report.txt || true"
                         """
                     }
                 }
@@ -73,13 +73,10 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                    withCredentials([
-                        sshUserPrivateKey(credentialsId: 'mac-ssh', keyFileVariable: 'SSH_KEY'),
-                        usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')
-                    ]) {
+                    withCredentials([sshUserPrivateKey(credentialsId: 'mac-ssh', keyFileVariable: 'SSH_KEY')]) {
                         bat """
-                            ssh -i %SSH_KEY% -o StrictHostKeyChecking=no dhairya@100.90.56.19 ^
-                            "docker push dhairya2704/internship-app:%BUILD_NUMBER%"
+                            icacls "%SSH_KEY%" /inheritance:r /grant:r "%USERNAME%:F"
+                            ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no dhairya@100.90.56.19 "docker push dhairya2704/internship-app:%BUILD_NUMBER%"
                         """
                     }
                 }
