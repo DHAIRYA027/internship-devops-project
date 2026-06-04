@@ -76,7 +76,7 @@ pipeline {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                     bat """
-                        powershell -Command "(Get-Content kubernetes/deployment.yaml) -replace 'image:.*', 'image: dhairya2704/internship-app:${BUILD_NUMBER}' | Set-Content kubernetes/deployment.yaml"
+                        powershell -Command "(Get-Content kubernetes/deployment.yaml) -replace 'image:.*', 'image: dhairya2704/internship-app:latest' | Set-Content kubernetes/deployment.yaml"
                     """
                 }
             }
